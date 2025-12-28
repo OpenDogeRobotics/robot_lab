@@ -198,7 +198,12 @@ RSL-RL:
 
 ```bash
 # Train
+# <ENV_NAME> location(e.g.): source/robot_lab/robot_lab/tasks/manager_based/locomotion/velocity/config/quadruped/zsibot_zsl1/__init__.py
+# e.g.: python scripts/reinforcement_learning/rsl_rl/train.py --task=RobotLab-Isaac-Velocity-Rough-Opendoge-Apx-v0 --headless
 python scripts/reinforcement_learning/rsl_rl/train.py --task=<ENV_NAME> --headless
+
+# *.pt files from training(e.g.: robot 'zsibot_zsl1' using 'rough' env):
+# ./robot_lab/logs/rsl_rl/zsibot_zsl1_rough/2025-12-16_21-47-16/model_49999.pt
 
 # Play
 python scripts/reinforcement_learning/rsl_rl/play.py --task=<ENV_NAME>
@@ -342,19 +347,37 @@ itself. However, its various instances are included in directories within the en
 This looks like as follows:
 
 ```tree
-source/robot_lab/assets/
-├── __init__.py
-└── unitree.py  # <- this is where we define robot assets
+source/robot_lab/data/Robots
+├── unitree/a1_description/mesh
+├── unitree/a1_description/urdf
+|   └──a1.urdf
+├── zsibot/zsl1_description/mesh
+├── zsibot/zsl1_description/urdf
+|   └──zsl1.urdf
+├── opendoge/apx_description/mesh
+└── opendoge/apx_description/urdf
+    └──apx_description.urdf
 
-source/robot_lab/tasks/manager_based/locomotion/
+source/robot_lab/robot_lab/assets/
+├── __init__.py
+|── unitree.py  # <- this is where we define robot assets
+└── zsibot.py  # <- including urdf...
+
+source/robot_lab/robot_lab/tasks/manager_based/locomotion/
 ├── __init__.py
 └── velocity
-    ├── config
+    ├── config/quadruped
     │   └── unitree_a1
     │       ├── agent  # <- this is where we store the learning agent configurations
     │       ├── __init__.py  # <- this is where we register the environment and configurations to gym registry
     │       ├── flat_env_cfg.py
     │       └── rough_env_cfg.py
+    │   └── zsibot_zsl1
+    │       ├── agent  # <- this is where we store the learning agent configurations
+    |           └── rsl_rl_ppo_cfg.py
+    │       ├── __init__.py  # <- this is where we register the environment and configurations to gym registry
+    │       ├── flat_env_cfg.py
+    │       └── rough_env_cfg.py  # <- Observations/Actions/Events/Rewards, look into its parent class: velocity_env_cfg.py
     ├── __init__.py
     └── velocity_env_cfg.py  # <- this is the base task configuration
 ```

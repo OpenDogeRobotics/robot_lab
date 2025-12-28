@@ -38,3 +38,6 @@ _build
 
 # LSP
 pyrightconfig.json
+
+# opendoge urdf
+apx_description
