@@ -40,5 +40,5 @@ class OpendogeApxFlatPPORunnerCfg(OpendogeApxRoughPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 20000
+        self.max_iterations = 5000
         self.experiment_name = "opendoge_apx_flat"

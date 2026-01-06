@@ -51,97 +51,120 @@ class OpendogeApxRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # ------------------------------Events------------------------------
         self.events.randomize_reset_base.params = {
             "pose_range": {
-                "x": (-0.5, 0.5),
-                "y": (-0.5, 0.5),
-                "z": (0.0, 0.2),
-                "roll": (-3.14, 3.14),
-                "pitch": (-3.14, 3.14),
-                "yaw": (-3.14, 3.14),
+                # "x": (-0.5, 0.5),
+                # "y": (-0.5, 0.5),
+                # "z": (0.0, 0.2),
+                "x": (-0, 0),
+                "y": (-0, 0),
+                "z": (0.1, 0.2),
+                # "roll": (-3.14, 3.14),
+                # "pitch": (-3.14, 3.14),
+                # "yaw": (-3.14, 3.14),
+                "roll": (-0.0, 0.0),
+                "pitch": (-0.0, 0.0),
+                "yaw": (-0, 0),
             },
             "velocity_range": {
-                "x": (-0.5, 0.5),
-                "y": (-0.5, 0.5),
-                "z": (-0.5, 0.5),
-                "roll": (-0.5, 0.5),
-                "pitch": (-0.5, 0.5),
-                "yaw": (-0.5, 0.5),
+                # "x": (-0.5, 0.5),
+                # "y": (-0.5, 0.5),
+                # "z": (-0.5, 0.5),
+                # "roll": (-0.5, 0.5),
+                # "pitch": (-0.5, 0.5),
+                # "yaw": (-0.5, 0.5),
+                "x": (-0, 0.0),
+                "y": (-0.0, 0.0),
+                "z": (-0.0, 0.0),
+                "roll": (-0.000, 0.000),
+                "pitch": (-0.000, 0.000),
+                "yaw": (-0.000, 0.000),
             },
         }
         self.events.randomize_rigid_body_mass_base.params["asset_cfg"].body_names = [self.base_link_name]
-        self.events.randomize_rigid_body_mass_base.params["mass_distribution_params"] = (-0.5, 0.5)  # avoid 'PhysX error: PxRigidBody::setMass(): mass must be non-negative!' 
+        self.events.randomize_rigid_body_mass_base.params["mass_distribution_params"] = (-0.1, 0.1)  # avoid 'PhysX error: PxRigidBody::setMass(): mass must be non-negative!' 
         self.events.randomize_rigid_body_mass_others.params["asset_cfg"].body_names = [
             f"^(?!.*{self.base_link_name}).*"
         ]
         self.events.randomize_com_positions.params["asset_cfg"].body_names = [self.base_link_name]
         self.events.randomize_apply_external_force_torque.params["asset_cfg"].body_names = [self.base_link_name]
+        # override to reduce the turbulence for opendoge training
+        self.events.randomize_apply_external_force_torque.params["force_range"] = (-0.1, 0.1)
+        self.events.randomize_apply_external_force_torque.params["torque_range"] = (-0.1, 0.1)
+        # override to increase the stability for opendoge training
+        self.events.randomize_com_positions.params["com_range"] = {"x": (-0.01, 0.01), "y": (-0.01, 0.01), "z": (-0.00, 0.01)}
+        # override to reduce the random push for opendoge training
+        self.events.randomize_push_robot.interval_range_s = (2.0, 3.0)
+        self.events.randomize_push_robot.params["velocity_range"] = {"x": (-0.1, 0.1), "y": (-0.1, 0.1), "z": (-0.1, 0.1)}
+        # override to reduce the stiffness and damping randomization for opendoge training
+        self.events.randomize_actuator_gains.params["stiffness_distribution_params"] = (0.9, 1.1)
+        self.events.randomize_actuator_gains.params["damping_distribution_params"] = (0.9, 1.1)
 
         # ------------------------------Rewards------------------------------
         # General
         self.rewards.is_terminated.weight = 0
 
         # Root penalties
-        self.rewards.lin_vel_z_l2.weight = -2.0
-        self.rewards.ang_vel_xy_l2.weight = -0.05
+        self.rewards.lin_vel_z_l2.weight = -2.0  # penalize z velocity
+        self.rewards.ang_vel_xy_l2.weight = -0.05  # penalize roll/pitch angular velocity
         self.rewards.flat_orientation_l2.weight = 0
         self.rewards.base_height_l2.weight = 0
-        self.rewards.base_height_l2.params["target_height"] = 0.32
+        self.rewards.base_height_l2.params["target_height"] = 0.29  # opendoge_apx resting height ~0.29m?
         self.rewards.base_height_l2.params["asset_cfg"].body_names = [self.base_link_name]
         self.rewards.body_lin_acc_l2.weight = 0
         self.rewards.body_lin_acc_l2.params["asset_cfg"].body_names = [self.base_link_name]
 
         # Joint penalties
-        self.rewards.joint_torques_l2.weight = -2.5e-5
+        self.rewards.joint_torques_l2.weight = -2.5e-5  # reduce joint torques
         self.rewards.joint_vel_l2.weight = 0
-        self.rewards.joint_acc_l2.weight = -2.5e-7
+        self.rewards.joint_acc_l2.weight = -2.5e-7  # encourage smooth joint movement
         # self.rewards.create_joint_deviation_l1_rewterm("joint_deviation_hip_l1", -0.2, [".*_hip_joint"])
-        self.rewards.joint_pos_limits.weight = -5.0
+        self.rewards.joint_pos_limits.weight = -5.0  # discourage joint limit violation
         self.rewards.joint_vel_limits.weight = 0
-        self.rewards.joint_power.weight = -2e-5
-        self.rewards.stand_still.weight = -2.0
-        self.rewards.joint_pos_penalty.weight = -1.0
-        self.rewards.joint_mirror.weight = -0.05
+        self.rewards.joint_power.weight = -2e-5  # reduce joint power consumption
+        self.rewards.stand_still.weight = -2.0  # discourage standing still
+        self.rewards.joint_pos_penalty.weight = -1.0  # encourage joints close to zero position
+        self.rewards.joint_mirror.weight = -0.05  # encourage symmetric joint movement
         self.rewards.joint_mirror.params["mirror_joints"] = [
             ["FR_(hip|thigh|calf).*", "RL_(hip|thigh|calf).*"],
             ["FL_(hip|thigh|calf).*", "RR_(hip|thigh|calf).*"],
         ]
 
         # Action penalties
-        self.rewards.action_rate_l2.weight = -0.01
+        self.rewards.action_rate_l2.weight = -0.01  # encourage smooth actions
 
         # Contact sensor
-        self.rewards.undesired_contacts.weight = -1.0
+        self.rewards.undesired_contacts.weight = -1.0  # discourage undesired contacts
         self.rewards.undesired_contacts.params["sensor_cfg"].body_names = [f"^(?!.*{self.foot_link_name}).*"]
-        self.rewards.contact_forces.weight = -1.5e-4
+        self.rewards.contact_forces.weight = -1.5e-4  # reduce contact forces
         self.rewards.contact_forces.params["sensor_cfg"].body_names = [self.foot_link_name]
 
         # Velocity-tracking rewards
-        self.rewards.track_lin_vel_xy_exp.weight = 3.0
-        self.rewards.track_ang_vel_z_exp.weight = 1.5
+        self.rewards.track_lin_vel_xy_exp.weight = 3.0  # track linear velocity in x-y plane
+        self.rewards.track_ang_vel_z_exp.weight = 1.5  # track angular velocity around z
 
         # Others
-        self.rewards.feet_air_time.weight = 0.1
+        self.rewards.feet_air_time.weight = 0.1  # encourage longer foot air time
         self.rewards.feet_air_time.params["threshold"] = 0.5
         self.rewards.feet_air_time.params["sensor_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_air_time_variance.weight = -1.0
+        self.rewards.feet_air_time_variance.weight = -1.0  # encourage uniform foot air time?
         self.rewards.feet_air_time_variance.params["sensor_cfg"].body_names = [self.foot_link_name]
         self.rewards.feet_contact.weight = 0
         self.rewards.feet_contact.params["sensor_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_contact_without_cmd.weight = 0.1
+        self.rewards.feet_contact_without_cmd.weight = 0.1  # encourage feet contact when no command
         self.rewards.feet_contact_without_cmd.params["sensor_cfg"].body_names = [self.foot_link_name]
         self.rewards.feet_stumble.weight = 0
         self.rewards.feet_stumble.params["sensor_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_slide.weight = -0.1
+        self.rewards.feet_slide.weight = -0.1  # discourage foot sliding
         self.rewards.feet_slide.params["sensor_cfg"].body_names = [self.foot_link_name]
         self.rewards.feet_slide.params["asset_cfg"].body_names = [self.foot_link_name]
         self.rewards.feet_height.weight = 0
         self.rewards.feet_height.params["target_height"] = 0.05
         self.rewards.feet_height.params["asset_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_height_body.weight = -5.0
+        self.rewards.feet_height_body.weight = -5.0  # encourage feet close to body
         self.rewards.feet_height_body.params["target_height"] = -0.2
         self.rewards.feet_height_body.params["asset_cfg"].body_names = [self.foot_link_name]
-        self.rewards.feet_gait.weight = 0.5
+        self.rewards.feet_gait.weight = 0.5  # encourage diagonal gait
         self.rewards.feet_gait.params["synced_feet_pair_names"] = (("FL_foot", "RR_foot"), ("FR_foot", "RL_foot"))
-        self.rewards.upward.weight = 1.0
+        self.rewards.upward.weight = 1.0  # encourage upward base orientation
 
         # If the weight of rewards is 0, set rewards to None
         if self.__class__.__name__ == "OpendogeApxRoughEnvCfg":
@@ -158,6 +181,6 @@ class OpendogeApxRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.curriculum.command_levels_ang_vel = None
 
         # ------------------------------Commands------------------------------
-        # self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
-        # self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)
-        # self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_y = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
