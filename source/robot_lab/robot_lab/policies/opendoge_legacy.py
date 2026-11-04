@@ -1,3 +1,6 @@
+# Copyright (c) 2024-2026 Ziqi Fan
+# SPDX-License-Identifier: Apache-2.0
+
 """Original OpenDoge HIM ONNX inference contract (not the V1.1 robot)."""
 
 from pathlib import Path

@@ -1,3 +1,6 @@
+# Copyright (c) 2024-2026 Ziqi Fan
+# SPDX-License-Identifier: Apache-2.0
+
 """OpenDog V1.1 from LainLab feat/opendoge; see bundled provenance/licenses."""
 
 from robot_lab.assets.opendoge import OPENDOGE_CFG

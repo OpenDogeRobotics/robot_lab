@@ -14,6 +14,13 @@ Original OpenDoge model and exported HIM policy replay: [usage and compatibility
 
 OpenDog V1.1 model and LainLab flat/getup/rough/multi-skill policies: [usage and validation](docs/opendoge-v1.1.md).
 
+The existing OpenDoge APX flat/rough training tasks are also retained, with Isaac Lab 3.0
+configuration APIs. APX is a separate robot from the bundled legacy OpenDoge and V1.1 models.
+Supply its original `apx_description` directory (including meshes) under
+`source/robot_lab/robot_lab/assets/data/Robots/opendoge/`, so the URDF is located at
+`opendoge/apx_description/urdf/apx_description.urdf`. Those external APX assets are not bundled.
+Use `isaaclab list_envs --keyword Opendoge-Apx` to discover its two training tasks.
+
 **robot_lab** is a RL extension library for robots, based on IsaacLab. It allows you to develop in an isolated environment, outside of the core Isaac Lab repository.
 
 The table below lists representative environments. Use `isaaclab list_envs` for all task IDs and agent configurations:

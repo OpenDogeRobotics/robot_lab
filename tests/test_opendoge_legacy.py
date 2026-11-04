@@ -1,3 +1,6 @@
+# Copyright (c) 2024-2026 Ziqi Fan
+# SPDX-License-Identifier: Apache-2.0
+
 """The legacy exported policy retains its training-time input and action contract."""
 
 import numpy as np

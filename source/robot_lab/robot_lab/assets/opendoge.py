@@ -1,3 +1,6 @@
+# Copyright (c) 2024-2026 Ziqi Fan
+# SPDX-License-Identifier: Apache-2.0
+
 """Original OpenDoge articulation, ported from OpenDoge_train (see SOURCE_LICENSE).
 
 This asset intentionally uses the original joint axes and stance, not OpenDog V1.1.
@@ -7,7 +10,7 @@ from isaaclab_newton.sim.schemas import NewtonArticulationCfg
 from isaaclab_physx.sim.schemas import PhysxArticulationCfg, PhysxRigidBodyCfg
 
 import isaaclab.sim as sim_utils
-from isaaclab.actuators import IdealPDActuatorCfg
+from isaaclab.actuators import DCMotorCfg, IdealPDActuatorCfg
 from isaaclab.assets import ArticulationCfg
 
 from robot_lab.assets import ROBOT_LAB_ASSETS_DIR
@@ -55,3 +58,29 @@ OPENDOGE_CFG = ArticulationCfg(
         )
     },
 )
+
+# APX configuration retained from main (2024-2025 jayjayhust, Apache-2.0).
+# APX is a separate robot; its URDF/meshes must be supplied by the user.
+OPENDOGE_APX_CFG = OPENDOGE_CFG.copy()
+OPENDOGE_APX_CFG.spawn.asset_path = str(
+    ROBOT_LAB_ASSETS_DIR / "Robots/opendoge/apx_description/urdf/apx_description.urdf"
+)
+OPENDOGE_APX_CFG.spawn.merge_fixed_joints = True
+OPENDOGE_APX_CFG.spawn.replace_cylinders_with_capsules = False
+OPENDOGE_APX_CFG.spawn.rigid_props.max_linear_velocity = 1000.0
+OPENDOGE_APX_CFG.spawn.rigid_props.max_angular_velocity = 1000.0
+OPENDOGE_APX_CFG.spawn.articulation_props[0].solver_velocity_iteration_count = 0
+OPENDOGE_APX_CFG.init_state.pos = (0.0, 0.0, 0.4)
+OPENDOGE_APX_CFG.init_state.joint_pos = {".*_hip_joint": 0.0, ".*_thigh_joint": 0.8, ".*_calf_joint": -1.5}
+OPENDOGE_APX_CFG.actuators = {
+    "base_legs": DCMotorCfg(
+        joint_names_expr=[".*_hip_joint", ".*_thigh_joint", ".*_calf_joint"],
+        joint_effort_limit=1.0e9,
+        actuator_effort_limit=28,
+        saturation_effort=28,
+        actuator_velocity_limit=28,
+        stiffness=20.0,
+        damping=0.7,
+        friction=0.0,
+    ),
+}

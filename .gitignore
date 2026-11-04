@@ -50,3 +50,5 @@ dist/
 /imgui.ini
 /robotlab-gui.log
 /robotlab-gui-error.log
+# opendoge urdf
+apx_description

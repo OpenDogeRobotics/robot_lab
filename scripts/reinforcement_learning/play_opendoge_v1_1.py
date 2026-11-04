@@ -1,3 +1,6 @@
+# Copyright (c) 2024-2026 Ziqi Fan
+# SPDX-License-Identifier: Apache-2.0
+
 """Replay LainLab OpenDog V1.1 exports in Isaac Lab on flat ground."""
 
 import argparse

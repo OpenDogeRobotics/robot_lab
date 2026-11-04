@@ -1,3 +1,6 @@
+# Copyright (c) 2024-2026 Ziqi Fan
+# SPDX-License-Identifier: Apache-2.0
+
 """LainLab V1.1 exported-policy contract, independent of the mjlab runtime.
 
 See assets/data/Robots/opendoge_v1_1 for source revision and licenses.
