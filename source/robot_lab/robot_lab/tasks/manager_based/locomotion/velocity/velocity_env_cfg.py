@@ -1,7 +1,7 @@
-# Copyright (c) 2024-2025 Ziqi Fan
+# Copyright (c) 2024-2026 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
-# Copyright (c) 2022-2025, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
+# Copyright (c) 2022-2026, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -24,7 +24,9 @@ from isaaclab.sensors import ContactSensorCfg, RayCasterCfg, patterns
 from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
-from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
+from isaaclab.utils.noise import UniformNoiseCfg as Unoise
+
+from isaaclab_tasks.core.velocity.velocity_env_cfg import RoughPhysicsCfg
 
 import robot_lab.tasks.manager_based.locomotion.velocity.mdp as mdp
 
@@ -68,20 +70,22 @@ class MySceneCfg(InteractiveSceneCfg):
     robot: ArticulationCfg = MISSING
     # sensors
     height_scanner = RayCasterCfg(
-        prim_path="{ENV_REGEX_NS}/Robot/base",
+        prim_path="{ENV_REGEX_NS}/Robot/.*base",
         offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
         ray_alignment="yaw",
         pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),
         debug_vis=False,
         mesh_prim_paths=["/World/ground"],
+        global_world_only=True,
     )
     height_scanner_base = RayCasterCfg(
-        prim_path="{ENV_REGEX_NS}/Robot/base",
+        prim_path="{ENV_REGEX_NS}/Robot/.*base",
         offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
         ray_alignment="yaw",
         pattern_cfg=patterns.GridPatternCfg(resolution=0.05, size=(0.1, 0.1)),
         debug_vis=False,
         mesh_prim_paths=["/World/ground"],
+        global_world_only=True,
     )
     contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True)
     # lights
@@ -292,17 +296,6 @@ class EventCfg:
             "recompute_inertia": True,
         },
     )
-
-    # Skip: inertia updated via mass randomization by setting recompute_inertia=True
-    # randomize_rigid_body_inertia = EventTerm(
-    #     func=mdp.randomize_rigid_body_inertia,
-    #     mode="startup",
-    #     params={
-    #         "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
-    #         "inertia_distribution_params": (0.5, 1.5),
-    #         "operation": "scale",
-    #     },
-    # )
 
     randomize_com_positions = EventTerm(
         func=mdp.randomize_rigid_body_com,
@@ -696,6 +689,8 @@ class CurriculumCfg:
 class LocomotionVelocityRoughEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the locomotion velocity-tracking environment."""
 
+    sim: sim_utils.SimulationCfg = sim_utils.SimulationCfg(physics=RoughPhysicsCfg())
+
     # Scene settings
     scene: MySceneCfg = MySceneCfg(num_envs=4096, env_spacing=2.5)
     # Basic settings
@@ -717,7 +712,7 @@ class LocomotionVelocityRoughEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.dt = 0.005
         self.sim.render_interval = self.decimation
         self.sim.physics_material = self.scene.terrain.physics_material
-        self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
+        self.sim.use_newton_actuators = True
         # update sensor update periods
         # we tick all the sensors based on the smallest update period (physics update period)
         if self.scene.height_scanner is not None:

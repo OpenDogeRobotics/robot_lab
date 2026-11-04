@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Ziqi Fan
+# Copyright (c) 2024-2026 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
 """Common functions that can be used to create curriculum for the learning environment.
@@ -9,9 +9,10 @@ the curriculum introduced by the function.
 
 from __future__ import annotations
 
-import torch
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
+
+import torch
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
@@ -22,11 +23,11 @@ def command_levels_lin_vel(
     env_ids: Sequence[int],
     reward_term_name: str,
     range_multiplier: Sequence[float] = (0.1, 1.0),
-) -> None:
+) -> torch.Tensor:
     """command_levels_lin_vel"""
     base_velocity_ranges = env.command_manager.get_term("base_velocity").cfg.ranges
-    # Get original velocity ranges (ONLY ON FIRST EPISODE)
-    if env.common_step_counter == 0:
+    # Capture the configured ranges once, including when reset is called again before stepping.
+    if not hasattr(env, "_original_vel_x"):
         env._original_vel_x = torch.tensor(base_velocity_ranges.lin_vel_x, device=env.device)
         env._original_vel_y = torch.tensor(base_velocity_ranges.lin_vel_y, device=env.device)
         env._initial_vel_x = env._original_vel_x * range_multiplier[0]
@@ -65,11 +66,11 @@ def command_levels_ang_vel(
     env_ids: Sequence[int],
     reward_term_name: str,
     range_multiplier: Sequence[float] = (0.1, 1.0),
-) -> None:
+) -> torch.Tensor:
     """command_levels_ang_vel"""
     base_velocity_ranges = env.command_manager.get_term("base_velocity").cfg.ranges
-    # Get original angular velocity ranges (ONLY ON FIRST EPISODE)
-    if env.common_step_counter == 0:
+    # Capture the configured ranges once, including when reset is called again before stepping.
+    if not hasattr(env, "_original_ang_vel_z"):
         env._original_ang_vel_z = torch.tensor(base_velocity_ranges.ang_vel_z, device=env.device)
         env._initial_ang_vel_z = env._original_ang_vel_z * range_multiplier[0]
         env._final_ang_vel_z = env._original_ang_vel_z * range_multiplier[1]

@@ -1,7 +1,7 @@
-# Copyright (c) 2024-2025 Ziqi Fan
+# Copyright (c) 2024-2026 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
-# Copyright (c) 2022-2025, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
+# Copyright (c) 2022-2026, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -9,10 +9,9 @@
 import matplotlib
 import matplotlib.animation
 import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d  # noqa: F401
 import numpy as np
 import torch
-
-import mpl_toolkits.mplot3d  # noqa: F401
 
 try:
     from .motion_loader import MotionLoader

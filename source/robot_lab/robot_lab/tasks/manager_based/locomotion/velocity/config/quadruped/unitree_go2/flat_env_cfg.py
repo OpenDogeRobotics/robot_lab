@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Ziqi Fan
+# Copyright (c) 2024-2026 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
 from isaaclab.utils import configclass
@@ -11,6 +11,12 @@ class UnitreeGo2FlatEnvCfg(UnitreeGo2RoughEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
+
+        # simulation settings
+        newton_mjwarp = self.sim.physics.newton_mjwarp
+        newton_mjwarp.solver_cfg.njmax = 65
+        newton_mjwarp.solver_cfg.nconmax = 35
+        self.sim.physics.default = newton_mjwarp
 
         # override rewards
         self.rewards.base_height_l2.params["sensor_cfg"] = None

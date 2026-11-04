@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Ziqi Fan
+# Copyright (c) 2024-2026 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass
@@ -28,7 +28,7 @@ class AnymalDFlatDistillationTrainerCfg(TrainerCfg):
         hooks=[
             cusrl.hook.ModuleInitialization(init_actor=False, init_critic=False, distribution_std=0.1),
             cusrl.hook.OnPolicyPreparation(),
-            cusrl.hook.PolicyDistillationLoss(""),
+            cusrl.hook.PolicyDistillation(""),
             cusrl.hook.GradientClipping(1.0),
         ],
     )

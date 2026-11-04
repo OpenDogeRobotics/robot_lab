@@ -39,5 +39,16 @@ _build
 # LSP
 pyrightconfig.json
 
+# uv environments
+.venv/
+.venv-*/
+# Python package builds
+**/build/
+dist/
+
+# Local viewer state and launch logs
+/imgui.ini
+/robotlab-gui.log
+/robotlab-gui-error.log
 # opendoge urdf
 apx_description

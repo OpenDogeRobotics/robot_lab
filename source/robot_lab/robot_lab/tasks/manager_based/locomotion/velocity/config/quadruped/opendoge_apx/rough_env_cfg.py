@@ -1,7 +1,10 @@
+# Copyright (c) 2024-2026 Ziqi Fan
+# SPDX-License-Identifier: Apache-2.0
+
 # Copyright (c) 2024-2025 jayjayhust
 # SPDX-License-Identifier: Apache-2.0
 
-from isaaclab.utils import configclass
+from isaaclab.utils import configclass, replace
 
 from robot_lab.tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg
 
@@ -28,9 +31,11 @@ class OpendogeApxRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         # post init of parent
         super().__post_init__()
 
-        self.scene.robot = OPENDOGE_APX_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = replace(OPENDOGE_APX_CFG, prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/" + self.base_link_name
         self.scene.height_scanner_base.prim_path = "{ENV_REGEX_NS}/Robot/" + self.base_link_name
+        self.scene.height_scanner.spawn = None
+        self.scene.height_scanner_base.spawn = None
 
         # ------------------------------Observations------------------------------
         self.observations.policy.base_lin_vel.scale = 2.0
@@ -68,7 +73,8 @@ class OpendogeApxRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
             },
         }
         self.events.randomize_rigid_body_mass_base.params["asset_cfg"].body_names = [self.base_link_name]
-        self.events.randomize_rigid_body_mass_base.params["mass_distribution_params"] = (-0.5, 0.5)  # avoid 'PhysX error: PxRigidBody::setMass(): mass must be non-negative!' 
+        # Preserve main's fix: the old wider additive range could produce negative mass.
+        self.events.randomize_rigid_body_mass_base.params["mass_distribution_params"] = (-0.5, 0.5)
         self.events.randomize_rigid_body_mass_others.params["asset_cfg"].body_names = [
             f"^(?!.*{self.base_link_name}).*"
         ]

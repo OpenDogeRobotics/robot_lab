@@ -1,19 +1,18 @@
-# Copyright (c) 2024-2025 Ziqi Fan
+# Copyright (c) 2024-2026 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
+# Hook revisions follow Isaac Lab v3.0.0.
 repos:
-  - repo: https://github.com/python/black
-    rev: 24.3.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.10
     hooks:
-      - id: black
-        args: ["--line-length", "120", "--unstable"]
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
-    hooks:
-      - id: flake8
-        additional_dependencies: [flake8-simplify, flake8-return]
+      # Run the linter
+      - id: ruff
+        args: ["--fix"]
+      # Run the formatter
+      - id: ruff-format
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: check-symlinks
@@ -29,36 +28,17 @@ repos:
       - id: check-shebang-scripts-are-executable
       - id: detect-private-key
       - id: debug-statements
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        name: isort (python)
-        args: ["--profile", "black", "--filter-files"]
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.1
-    hooks:
-      - id: pyupgrade
-        args: ["--py310-plus"]
-        # FIXME: This is a hack because Pytorch does not like: torch.Tensor | dict aliasing
-        exclude: "source/robot_lab/robot_lab/tasks/direct/g1_amp/motions/motion_loader.py"
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.4.1
     hooks:
       - id: codespell
         additional_dependencies:
-        - tomli
-        # args: [-L lamda]
-  # FIXME: Figure out why this is getting stuck under VPN.
-  # - repo: https://github.com/RobertCraigie/pyright-python
-  #   rev: v1.1.315
-  #   hooks:
-  #   - id: pyright
+          - tomli
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.1
+    rev: v1.5.5
     hooks:
       - id: insert-license
-        files: \.(py|ya?ml)$
+        files: \.(pyi?|ya?ml)$
         args:
           # - --remove-header    # Remove existing license headers. Useful when updating license.
           - --license-filepath
@@ -71,4 +51,13 @@ repos:
       - id: rst-directive-colons
       - id: rst-inline-touching-normal
 
-exclude: ^(source/robot_lab/robot_lab/third_party/|source/robot_lab/data/|.vscode/|.github/)
+exclude: |
+  (?x)^(
+    source/robot_lab/robot_lab/third_party/
+    |source/robot_lab/robot_lab/assets/data/
+    |\.vscode/
+    |\.github/
+    |_isaac_sim[^/]*(/|$)
+    |logs/
+    |outputs/
+  )

@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Ziqi Fan
+# Copyright (c) 2024-2026 Ziqi Fan
 # SPDX-License-Identifier: Apache-2.0
 
 from isaaclab.utils import configclass
@@ -27,3 +27,5 @@ class UnitreeGo2WFlatEnvCfg(UnitreeGo2WRoughEnvCfg):
         # If the weight of rewards is 0, set rewards to None
         if self.__class__.__name__ == "UnitreeGo2WFlatEnvCfg":
             self.disable_zero_weight_rewards()
+
+        # Only this independently validated class opts into Newton.
